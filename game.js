@@ -91,6 +91,7 @@ function create() {
 
   // petite aide
   this.add.text(16, H-24, "← → + saut (mobile: boutons)", { fontFamily: "Arial", fontSize: "16px", color:"#9ca3af" });
+  setupHtmlControls();
 }
 
 function update() {
@@ -253,4 +254,5 @@ function setupHtmlControls(){
 
   console.log("✅ Controls ready");
 }
+
 
