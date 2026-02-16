@@ -22,13 +22,14 @@
 /* le jeu prend tout sauf la barre */
 #game {
   height: calc(100dvh - 120px - env(safe-area-inset-bottom));
-  display: flex;
+  display: block;
   align-items: center;
   justify-content: center;
 }
 
 /* barre fixée en bas, avec safe area iPhone */
 #controls {
+  z-index: 9999;
   position: fixed;
   left: 0;
   right: 0;
@@ -73,4 +74,5 @@
   </div>
 </body>
 </html>
+
 
