@@ -64,6 +64,7 @@ function create() {
   player.setBounce(0.05);
 
   // taille visuelle
+  player.setOrigin(0.5, 1);
   player.setScale(0.4);
 
   // ✅ body synchronisé avec la taille affichée (évite l'effet "décroché")
@@ -72,7 +73,7 @@ function create() {
   // (optionnel) hitbox plus petite + centrée si tu veux un feeling plus "pro"
   // player.body.setSize(player.displayWidth * 0.55, player.displayHeight * 0.75, false);
   // player.body.setOffset(player.displayWidth * 0.225, player.displayHeight * 0.25);
-
+  player.body.setOffset(0, 0);
   // collectibles
   stars = this.physics.add.group({ allowGravity: false, immovable: true });
   stars.create(220, 380, "star");
@@ -264,3 +265,4 @@ function setupHtmlControls(){
 
   console.log("✅ Controls ready");
 }
+
