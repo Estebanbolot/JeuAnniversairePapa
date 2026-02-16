@@ -223,18 +223,34 @@ function makeTextureTri(scene, key, w, h, color) {
 function setupHtmlControls(){
   const bindHold = (id, key) => {
     const el = document.getElementById(id);
-    if (!el) return;
+    if (!el) {
+      console.warn("Bouton introuvable:", id);
+      return;
+    }
 
     const down = (e) => { e.preventDefault(); touch[key] = true; };
     const up   = (e) => { e.preventDefault(); touch[key] = false; };
 
+    // iOS Safari: touch events sont les plus fiables
+    el.addEventListener("touchstart", down, { passive: false });
+    el.addEventListener("touchend", up, { passive: false });
+    el.addEventListener("touchcancel", up, { passive: false });
+
+    // fallback (desktop / autres)
     el.addEventListener("pointerdown", down);
     el.addEventListener("pointerup", up);
     el.addEventListener("pointercancel", up);
     el.addEventListener("pointerleave", up);
+
+    el.addEventListener("mousedown", down);
+    el.addEventListener("mouseup", up);
+    el.addEventListener("mouseleave", up);
   };
 
   bindHold("btnLeft", "left");
   bindHold("btnRight", "right");
   bindHold("btnJump", "jump");
+
+  console.log("✅ Controls ready");
 }
+
