@@ -34,7 +34,6 @@ function preload() {
 function create() {
   // --- textures générées (pas besoin d'assets) ---
   makeTextureRect(this, "plat", 180, 28, 0x1f2937);
-  player = this.physics.add.sprite(100, 450, "playerImg");
   makeTextureTri(this, "spike", 36, 26, 0xef4444);
   makeTextureCircle(this, "star", 16, 0xfbbf24);
   makeTextureRect(this, "goal", 40, 70, 0x60a5fa);
@@ -56,17 +55,23 @@ function create() {
   spikes.create(410, 506, "spike");
   spikes.create(446, 506, "spike");
   spikes.create(482, 506, "spike");
-
   spikes.create(600, 506, "spike");
   spikes.create(636, 506, "spike");
 
-  // player
-  player = this.physics.add.sprite(100, 450, "player");
+  // ✅ player (UNE seule création, avec l'image)
+  player = this.physics.add.sprite(100, 450, "playerImg");
   player.setCollideWorldBounds(true);
   player.setBounce(0.05);
+
+  // taille visuelle
   player.setScale(0.4);
-  player.body.setSize(30, 50, true);
-  player.body.setOffset(5, 10);
+
+  // ✅ body synchronisé avec la taille affichée (évite l'effet "décroché")
+  player.body.setSize(player.displayWidth, player.displayHeight, true);
+
+  // (optionnel) hitbox plus petite + centrée si tu veux un feeling plus "pro"
+  // player.body.setSize(player.displayWidth * 0.55, player.displayHeight * 0.75, false);
+  // player.body.setOffset(player.displayWidth * 0.225, player.displayHeight * 0.25);
 
   // collectibles
   stars = this.physics.add.group({ allowGravity: false, immovable: true });
@@ -95,10 +100,15 @@ function create() {
 
   // petite aide
   this.add.text(16, H-24, "← → + saut (mobile: boutons)", { fontFamily: "Arial", fontSize: "16px", color:"#9ca3af" });
-window.addEventListener("blur", () => { touch.left=false; touch.right=false; touch.jump=false; });
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) { touch.left=false; touch.right=false; touch.jump=false; }
-});
+
+  // ✅ boutons HTML
+  setTimeout(setupHtmlControls, 0);
+
+  // reset touch states
+  window.addEventListener("blur", () => { touch.left=false; touch.right=false; touch.jump=false; });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { touch.left=false; touch.right=false; touch.jump=false; }
+  });
 }
 
 function update() {
@@ -142,33 +152,25 @@ function onWin() {
   this.physics.pause();
   player.setVelocity(0,0);
 
-  const overlay = this.add.rectangle(W/2, H/2, W, H, 0x000000, 0.75);
-  const title = this.add.text(W/2, 170, "BRAVO PAPA ! 🎉", { fontFamily:"Arial", fontSize:"44px" }).setOrigin(0.5);
-  const msg = this.add.text(
-  W/2, 250,
-  "Tu as débloqué ton cadeau :\n",
-  { fontFamily:"Arial", fontSize:"28px", align:"center" }
-).setOrigin(0.5);
+  this.add.rectangle(W/2, H/2, W, H, 0x000000, 0.75);
+  this.add.text(W/2, 170, "BRAVO PAPA ! 🎉", { fontFamily:"Arial", fontSize:"44px" }).setOrigin(0.5);
+  this.add.text(W/2, 250, "Tu as débloqué ton cadeau :\n", { fontFamily:"Arial", fontSize:"28px", align:"center" }).setOrigin(0.5);
 
-// --- BOUTON ---
-const button = this.add.rectangle(W/2, 340, 300, 70, 0x22c55e)
-  .setOrigin(0.5)
-  .setInteractive({ useHandCursor: true });
+  const button = this.add.rectangle(W/2, 340, 300, 70, 0x22c55e)
+    .setOrigin(0.5)
+    .setInteractive({ useHandCursor: true });
 
-const buttonText = this.add.text(W/2, 340, "VOIR LE CADEAU", {
-  fontFamily: "Arial",
-  fontSize: "24px",
-  color: "#000"
-}).setOrigin(0.5);
+  this.add.text(W/2, 340, "VOIR LE CADEAU", {
+    fontFamily: "Arial",
+    fontSize: "24px",
+    color: "#000"
+  }).setOrigin(0.5);
 
-// Hover effect (PC)
-button.on("pointerover", () => button.setFillStyle(0x16a34a));
-button.on("pointerout", () => button.setFillStyle(0x22c55e));
-
-// Click
-button.on("pointerdown", () => {
-  window.open("https://estebanbolot.github.io/Bon-p-re-fils/", "_blank");
-});
+  button.on("pointerover", () => button.setFillStyle(0x16a34a));
+  button.on("pointerout", () => button.setFillStyle(0x22c55e));
+  button.on("pointerdown", () => {
+    window.open("https://estebanbolot.github.io/Bon-p-re-fils/", "_blank");
+  });
 }
 
 function respawn(scene) {
@@ -190,7 +192,6 @@ function showPopup(scene, text) {
     ease: "Sine.easeInOut"
   });
 }
-
 
 let prevJump = false;
 function justPressedJump() {
@@ -236,7 +237,6 @@ function setupHtmlControls(){
     const down = (e) => {
       e.preventDefault();
       touch[key] = true;
-      // ultra important: si le doigt glisse hors du bouton, on continue à recevoir les events
       if (el.setPointerCapture && e.pointerId != null) el.setPointerCapture(e.pointerId);
     };
 
@@ -248,13 +248,11 @@ function setupHtmlControls(){
       }
     };
 
-    // ✅ pointer events (iOS récent OK)
     el.addEventListener("pointerdown", down, { passive:false });
     el.addEventListener("pointerup", up, { passive:false });
     el.addEventListener("pointercancel", up, { passive:false });
     el.addEventListener("pointerleave", up, { passive:false });
 
-    // ✅ fallback iOS/old
     el.addEventListener("touchstart", (e)=>{ e.preventDefault(); touch[key]=true; }, { passive:false });
     el.addEventListener("touchend",   (e)=>{ e.preventDefault(); touch[key]=false; }, { passive:false });
     el.addEventListener("touchcancel",(e)=>{ e.preventDefault(); touch[key]=false; }, { passive:false });
@@ -266,8 +264,3 @@ function setupHtmlControls(){
 
   console.log("✅ Controls ready");
 }
-
-
-
-
-
