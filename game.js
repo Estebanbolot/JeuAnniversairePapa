@@ -64,7 +64,9 @@ function create() {
   player = this.physics.add.sprite(100, 450, "player");
   player.setCollideWorldBounds(true);
   player.setBounce(0.05);
-  player.body.setSize(28, 40, true);
+  player.setScale(0.4);
+  player.body.setSize(30, 50, true);
+  player.body.setOffset(5, 10);
 
   // collectibles
   stars = this.physics.add.group({ allowGravity: false, immovable: true });
@@ -264,6 +266,7 @@ function setupHtmlControls(){
 
   console.log("✅ Controls ready");
 }
+
 
 
 
