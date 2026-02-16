@@ -91,7 +91,10 @@ function create() {
 
   // petite aide
   this.add.text(16, H-24, "← → + saut (mobile: boutons)", { fontFamily: "Arial", fontSize: "16px", color:"#9ca3af" });
-  setTimeout(setupHtmlControls, 0);
+window.addEventListener("blur", () => { touch.left=false; touch.right=false; touch.jump=false; });
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { touch.left=false; touch.right=false; touch.jump=false; }
+});
 }
 
 function update() {
@@ -166,7 +169,7 @@ button.on("pointerdown", () => {
 
 function respawn(scene) {
   player.setVelocity(0,0);
-  player.setPosition(100, 450 - UI_BOTTOM);
+  player.setPosition(100, 450);
   showPopup(scene, "Aïe ! Respawn 😅");
 }
 
@@ -224,28 +227,33 @@ function makeTextureTri(scene, key, w, h, color) {
 function setupHtmlControls(){
   const bindHold = (id, key) => {
     const el = document.getElementById(id);
-    if (!el) {
-      console.warn("Bouton introuvable:", id);
-      return;
-    }
+    if (!el) { console.warn("Bouton introuvable:", id); return; }
 
-    const down = (e) => { e.preventDefault(); touch[key] = true; };
-    const up   = (e) => { e.preventDefault(); touch[key] = false; };
+    const down = (e) => {
+      e.preventDefault();
+      touch[key] = true;
+      // ultra important: si le doigt glisse hors du bouton, on continue à recevoir les events
+      if (el.setPointerCapture && e.pointerId != null) el.setPointerCapture(e.pointerId);
+    };
 
-    // iOS Safari: touch events sont les plus fiables
-    el.addEventListener("touchstart", down, { passive: false });
-    el.addEventListener("touchend", up, { passive: false });
-    el.addEventListener("touchcancel", up, { passive: false });
+    const up = (e) => {
+      e.preventDefault();
+      touch[key] = false;
+      if (el.releasePointerCapture && e.pointerId != null) {
+        try { el.releasePointerCapture(e.pointerId); } catch {}
+      }
+    };
 
-    // fallback (desktop / autres)
-    el.addEventListener("pointerdown", down);
-    el.addEventListener("pointerup", up);
-    el.addEventListener("pointercancel", up);
-    el.addEventListener("pointerleave", up);
+    // ✅ pointer events (iOS récent OK)
+    el.addEventListener("pointerdown", down, { passive:false });
+    el.addEventListener("pointerup", up, { passive:false });
+    el.addEventListener("pointercancel", up, { passive:false });
+    el.addEventListener("pointerleave", up, { passive:false });
 
-    el.addEventListener("mousedown", down);
-    el.addEventListener("mouseup", up);
-    el.addEventListener("mouseleave", up);
+    // ✅ fallback iOS/old
+    el.addEventListener("touchstart", (e)=>{ e.preventDefault(); touch[key]=true; }, { passive:false });
+    el.addEventListener("touchend",   (e)=>{ e.preventDefault(); touch[key]=false; }, { passive:false });
+    el.addEventListener("touchcancel",(e)=>{ e.preventDefault(); touch[key]=false; }, { passive:false });
   };
 
   bindHold("btnLeft", "left");
