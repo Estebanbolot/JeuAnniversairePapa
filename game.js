@@ -160,7 +160,7 @@ button.on("pointerout", () => button.setFillStyle(0x22c55e));
 
 // Click
 button.on("pointerdown", () => {
-  window.open("https://estebanbolot.github.io/Bon-p-re-fils/", "_blank");
+  window.location.assign("https://estebanbolot.github.io/Bon-p-re-fils/", "_blank");
 });
 }
 
@@ -249,4 +249,5 @@ function makeTextureTri(scene, key, w, h, color) {
   g.fillPath();
   g.generateTexture(key, w, h);
   g.destroy();
+
 }
