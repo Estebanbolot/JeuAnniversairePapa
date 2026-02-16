@@ -27,12 +27,14 @@ let touch = { left:false, right:false, jump:false };
 let collected = 0;
 let uiText, popupText;
 
-function preload() {}
+function preload() {
+  this.load.image("playerImg", "player.png");
+}
 
 function create() {
   // --- textures générées (pas besoin d'assets) ---
   makeTextureRect(this, "plat", 180, 28, 0x1f2937);
-  makeTextureRect(this, "player", 30, 42, 0x22c55e);
+  player = this.physics.add.sprite(100, 450, "playerImg");
   makeTextureTri(this, "spike", 36, 26, 0xef4444);
   makeTextureCircle(this, "star", 16, 0xfbbf24);
   makeTextureRect(this, "goal", 40, 70, 0x60a5fa);
@@ -262,6 +264,7 @@ function setupHtmlControls(){
 
   console.log("✅ Controls ready");
 }
+
 
 
 
