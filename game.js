@@ -1,8 +1,10 @@
+const UI_BOTTOM = 180; // hauteur réservée aux boutons (en px)
 const W = 960;
 const H = 540;
 
 const config = {
   type: Phaser.AUTO,
+  parent: "game",
   width: W,
   height: H,
   backgroundColor: "#0b0b0f",
@@ -87,9 +89,6 @@ function create() {
   // clavier (PC)
   cursors = this.input.keyboard.createCursorKeys();
 
-  // boutons tactiles
-  createTouchButtons(this);
-
   // petite aide
   this.add.text(16, H-24, "← → + saut (mobile: boutons)", { fontFamily: "Arial", fontSize: "16px", color:"#9ca3af" });
 }
@@ -160,13 +159,13 @@ button.on("pointerout", () => button.setFillStyle(0x22c55e));
 
 // Click
 button.on("pointerdown", () => {
-  window.location.assign("https://estebanbolot.github.io/Bon-p-re-fils/", "_blank");
+  window.open("https://estebanbolot.github.io/Bon-p-re-fils/", "_blank");
 });
 }
 
 function respawn(scene) {
   player.setVelocity(0,0);
-  player.setPosition(100, 450);
+  player.setPosition(100, 450 - UI_BOTTOM);
   showPopup(scene, "Aïe ! Respawn 😅");
 }
 
@@ -184,36 +183,6 @@ function showPopup(scene, text) {
   });
 }
 
-// --- Touch buttons helpers ---
-function createTouchButtons(scene) {
-  const padY = H - 90;
-
-  const leftBtn = scene.add.rectangle(90, padY, 130, 130, 0xffffff, 0.10).setStrokeStyle(2, 0xffffff, 0.2);
-  const rightBtn = scene.add.rectangle(250, padY, 130, 130, 0xffffff, 0.10).setStrokeStyle(2, 0xffffff, 0.2);
-  const jumpBtn = scene.add.rectangle(W - 120, padY, 160, 160, 0xffffff, 0.10).setStrokeStyle(2, 0xffffff, 0.2);
-
-  scene.add.text(90, padY, "◀", { fontFamily:"Arial", fontSize:"44px", color:"#e5e7eb" }).setOrigin(0.5);
-  scene.add.text(250, padY, "▶", { fontFamily:"Arial", fontSize:"44px", color:"#e5e7eb" }).setOrigin(0.5);
-  scene.add.text(W - 120, padY, "⤒", { fontFamily:"Arial", fontSize:"60px", color:"#e5e7eb" }).setOrigin(0.5);
-
-  [leftBtn, rightBtn, jumpBtn].forEach(b => b.setScrollFactor(0).setInteractive({ useHandCursor: true }));
-
-  leftBtn.on("pointerdown", () => touch.left = true);
-  leftBtn.on("pointerup", () => touch.left = false);
-  leftBtn.on("pointerout", () => touch.left = false);
-
-  rightBtn.on("pointerdown", () => touch.right = true);
-  rightBtn.on("pointerup", () => touch.right = false);
-  rightBtn.on("pointerout", () => touch.right = false);
-
-  jumpBtn.on("pointerdown", () => { touch.jump = true; });
-  jumpBtn.on("pointerup", () => { touch.jump = false; });
-  jumpBtn.on("pointerout", () => { touch.jump = false; });
-
-  // anti-scroll mobile
-  scene.input.addPointer(2);
-  scene.game.canvas.style.touchAction = "none";
-}
 
 let prevJump = false;
 function justPressedJump() {
@@ -249,5 +218,23 @@ function makeTextureTri(scene, key, w, h, color) {
   g.fillPath();
   g.generateTexture(key, w, h);
   g.destroy();
+}
 
+function setupHtmlControls(){
+  const bindHold = (id, key) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const down = (e) => { e.preventDefault(); touch[key] = true; };
+    const up   = (e) => { e.preventDefault(); touch[key] = false; };
+
+    el.addEventListener("pointerdown", down);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    el.addEventListener("pointerleave", up);
+  };
+
+  bindHold("btnLeft", "left");
+  bindHold("btnRight", "right");
+  bindHold("btnJump", "jump");
 }
