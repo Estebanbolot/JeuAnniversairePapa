@@ -75,7 +75,7 @@ function create() {
   // player.body.setOffset(player.displayWidth * 0.225, player.displayHeight * 0.25);
   player.body.setOffset(
     (player.width  - player.body.width)  / 2,
-    (player.height - player.body.height) / 2
+    (player.height - player.body.height) / 2 + 6
   );
   // collectibles
   stars = this.physics.add.group({ allowGravity: false, immovable: true });
@@ -268,5 +268,6 @@ function setupHtmlControls(){
 
   console.log("✅ Controls ready");
 }
+
 
 
